@@ -30,7 +30,9 @@
 
               gtag('config', 'G-ZHY384EZP7');
     </script>
-
+        <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
 </head>
 
 <body>
@@ -68,15 +70,12 @@
     <img style="width: 80%;" src="./resources/teaser.png" alt="Teaser figure."/>
     <br>
     <p style="width: 80%;">
-    Given an input image, MOVES produces features (shown
-    using PCA to project to RGB) that easily group with ordinary clustering systems and can also be used to associate hands with the
-    objects they hold. The clusters are often sufficient for defining
-    objects, but additional cues such as a box further improve them.
-    At training time, MOVES learns this feature space from direct
-    discriminative training on simple pseudo-labels. While MOVES
-    learns only from objects that hands are actively holding (such as
-    the semi-transparent bag), we show that it works well on inactive
-    objects as well (such as the milk carton).
+    Given an input image, method produces features (shown using PCA to project to 
+    <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>) 
+    that easily group with ordinary clustering systems and can also be used to associate hands with the objects they hold. The clusters are often sufficient for defining objects, but additional cues such as a box improve them further. At training time, method learns this feature space from direct discriminative training on simple pseudo-labels. While method learns only from objects that hands are actively holding 
+    <span style='color:baggreen'>(such as the semi-transparent bag)</span>, 
+    we show that it works well on inactive objects as well 
+    <span style='color:cartonred'>(such as the milk carton)</span>.
     </p>
 
     <br><br>
@@ -85,6 +84,16 @@
     <h1>Abstract</h1>
     <p style="width: 80%;">
         Our method uses manipulation in video to learn to understand held-objects and hand-object contact. We train a system that takes a single RGB image and produces a pixel-embedding that can be used to answer grouping questions (do these two pixels go together) as well as hand-association questions (is this hand holding that pixel). Rather than painstakingly annotate segmentation masks, we observe people in realistic video data. We show that pairing epipolar geometry with modern optical flow produces simple and effective pseudo-labels for grouping. Given people segmentations, we can further associate pixels with hands to understand contact. Our system achieves competitive results on hand and hand-held object tasks.
+    </p>
+
+    <br><br>
+    <hr>
+
+    <h1>Poster</h1>
+    <img style="width: 80%;" src="./resources/poster.png"
+         alt="poster figure"/>
+    <br>
+    <p style="width: 80%;">
     </p>
 
     <br><br>
@@ -104,6 +113,21 @@
     <img style="width: 80%;" src="./resources/method.png"
          alt="Method overview figure"/>
     <br>
+    <p style="width: 80%;">
+    As input method accepts an RGB image and produces a 
+    \(H \times W \times F\) per-pixel feature embedding using a 
+    <span style='color:fcolor'>backbone HRNET 
+            <a href='https://doi.org/10.1007/978-3-030-11009-3_10' target='_blank'>(source)</a> 
+            denoted \(f(\cdot)\)</span>. Pairs of F-dimensional embeddings from this backbone can be passed to lightweight MLPs 
+    <span style='color:gcolor'>\(g(\cdot)\) to assess grouping probability</span> 
+    and <span style='color:acolor'>\(a(\cdot)\) to identify hand association</span>, 
+    or if the pixels are a hand and an object the hand is holding. Once trained, the method embeddings (here visualized with PCA to map the feature dimension to 
+    <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>)  
+    can be used for: <i>(Clusters)</i> directly applying HDBSCAN 
+    <a href='https://doi.org/10.18637/jss.v077.i01' target='_blank'>(source)</a>  
+    to the embeddings produces a good oversegmentation; 
+    <i>(Box2Seg)</i>: Given a box, one can produce a more accurate segment; and 
+    <i>(Hand Association)</i> Applying \(a\) to a query point and every pixel produces hand-object association (here, to a drawer).</p>
     <a class="links" href="https://github.com/relh/moves">[Code]</a>
 
     <br><br>
@@ -112,6 +136,17 @@
     <h1>Results</h1>
     <img style="width: 80%;" src="./resources/results.png"
          alt="Results figure"/>
+<p style="width: 80%;">Results from method, with examples from the EPICK VISOR validation set. <b>Key:</b> Each column shows a different input image. From left to right we show: (<i>Image</i>) the input image; (<i>method Features</i>) a PCA projection of the feature space to 
+<span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>; (<i>Clusters</i>) The clusters found by HDBSCAN applied to the feature space with each cluster visualized with a random color; (<i>Association</i>) The prediction of the association head on the image on one of the hands in the image; (<i>Hands+Held</i>) A Mask of hands and hand-held Objects in the image. The association head usually does a good job of recognizing the objects that hands are holding. <b>Discussion:</b> 
+<ul>
+    <li>(row 1) although the cabinet door is thin, method recognizes the association between hand and door.</li>
+    <li>(row 2) method detects a large mixing bowl.</li>
+    <li>(row 3) the transparent glass pan lid is recognized as an object by method despite the stovetop below being visible through it.</li>
+    <li>(row 4) the multi-colored hand towel is clustered as separate segments, however the association head helps segment most of the hand towel, showing the complementary nature of pairing an association head with clustering.</li>
+    <li>(row 5) the transparent bottle is segmented nicely.</li>
+    <li>(row 6) the cutting board is being cleared into the trashcan, but method successfully identifies the board as being the held object.</li>
+</ul></p>
+
 
     <br><br>
     <hr>
