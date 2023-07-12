@@ -1,40 +1,14 @@
-MOVES: Manipulated Objects in Video Enable Segmentation
-====================================
+## Webpage Template
 
-I will publish the cleaned-up code soon. For now here is a brief overview.
+This template was originally made by [Phillip Isola](http://web.mit.edu/phillipi/) and [Richard Zhang](http://richzhang.github.io/) for a [colorful project](http://richzhang.github.io/colorization/), and inherits the modifications made by [Jason Zhang](https://github.com/jasonyzhang/webpage-template).
+See how the webpage looks [here](https://elliottwu.com/webpage-template/).
 
-Collect a folder of videos
------------------
-
-All you need is a folder of videos to get started!
-
-Run optical flow bi-directionally between frames offset ~0.5s
------------------
-
-I have code that will `ffprobe` a video and spot the framerate, so don't worry about this.
-
-(Optional) Use off-the-shelf person segmentation to generate people masks.
------------------
-
-If your videos don't have people in them, that's fine. Then you can skip this.
-
-Training
------------------
-
-During training we use the above outputs, creating pseudolabels on the fly. We then learn grouping and association from these labels with a simple MLP.
-
-Citation
------------------
-
-If you find our method or this repo helpful, please consider citing our conference paper:
-
-```bibtex
-@inproceedings{higgins2023moves,
-  title={MOVES: Manipulated Objects in Video Enable Segmentation},
-  author={Higgins, Richard EL and Fouhey, David F},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={6334--6343},
-  year={2023}
-}
+To use this template, clone the repo:
+```
+git clone https://github.com/elliottwu/webpage-template
 ```
 
+Copy the contents into a `gh-pages` branch of a GitHub repo. That will automatically
+make a webpage under address [GITHUB_USERNAME.github.io/REPO_NAME](GITHUB_USERNAME.github.io/REPO_NAME).
+
+Don't forget to update the Google Analytics script!
