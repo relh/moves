@@ -113,11 +113,14 @@
     or if the pixels are a hand and an object the hand is holding. Once trained, the MOVES embeddings (here visualized with PCA to map the feature dimension to 
     <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>)  
     can be used for: 
+    </p>
+<div style="width: 80%;">
 <ul style="text-align: left;">
         <li><i>(Clusters)</i> directly applying HDBSCAN to the embeddings produces a good oversegmentation; </li>
         <li><i>(Box2Seg)</i>: Given a box, one can produce a more accurate segment; </li>
         <li><i>(Hand Association)</i> Applying \(a\) to a query point and every pixel produces hand-object association (here, to a drawer).</li>
-</ul></p>
+</ul>
+</div>
     <a class="links" href="https://github.com/relh/moves">[Code]</a>
 
     <br><br>
@@ -130,7 +133,7 @@
 </p>
 <br><br>
 <div style="width: 80%;">
-<b>Key:</b> Each column shows a different input image. From left to right we show: 
+<b>Key:</b> Each row shows a different input image. From left to right we show: 
 <ul style="text-align: left;">
         <li>(<i>Image</i>) the input image; </li>
         <li>(<i>MOVES Features</i>) a PCA projection of the feature space to <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>; </li>
@@ -141,7 +144,7 @@
 </div>
 <br><br>
 <div style="width: 80%;">
-<b>Discussion:</b> 
+<b>Discussion:</b> Each row shows a different example and here we discuss each of them:
 <ul style="text-align: left;">
     <li>(row 1) although the cabinet door is thin, MOVES recognizes the association between hand and door.</li>
     <li>(row 2) MOVES detects a large mixing bowl.</li>
