@@ -112,10 +112,12 @@
     and <span style='color:acolor'>\(a(\cdot)\) to identify hand association</span>, 
     or if the pixels are a hand and an object the hand is holding. Once trained, the MOVES embeddings (here visualized with PCA to map the feature dimension to 
     <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>)  
-    can be used for: <i>(Clusters)</i> directly applying HDBSCAN 
-    to the embeddings produces a good oversegmentation; 
-    <i>(Box2Seg)</i>: Given a box, one can produce a more accurate segment; and 
-    <i>(Hand Association)</i> Applying \(a\) to a query point and every pixel produces hand-object association (here, to a drawer).</p>
+    can be used for: 
+<ul style="text-align: left;">
+        <li><i>(Clusters)</i> directly applying HDBSCAN to the embeddings produces a good oversegmentation; </li>
+        <li><i>(Box2Seg)</i>: Given a box, one can produce a more accurate segment; </li>
+        <li><i>(Hand Association)</i> Applying \(a\) to a query point and every pixel produces hand-object association (here, to a drawer).</li>
+</ul></p>
     <a class="links" href="https://github.com/relh/moves">[Code]</a>
 
     <br><br>
@@ -124,10 +126,22 @@
     <h1>Results</h1>
     <img style="width: 80%;" src="./resources/results.png"
          alt="Results figure"/>
-<p style="width: 80%;">Results from MOVES, with examples from the EPICK VISOR validation set. <b>Key:</b> Each column shows a different input image. From left to right we show: (<i>Image</i>) the input image; (<i>MOVES Features</i>) a PCA projection of the feature space to 
-<span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>; (<i>Clusters</i>) The clusters found by HDBSCAN applied to the feature space with each cluster visualized with a random color; (<i>Association</i>) The prediction of the association head on the image on one of the hands in the image; (<i>Hands+Held</i>) A Mask of hands and hand-held Objects in the image. The association head usually does a good job of recognizing the objects that hands are holding. <b>Discussion:</b> 
+<p style="width: 80%;">Results from MOVES, with examples from the EPICK VISOR validation set. 
 </p>
+<br><br>
 <div style="width: 80%;">
+<b>Key:</b> Each column shows a different input image. From left to right we show: 
+<ul style="text-align: left;">
+        <li>(<i>Image</i>) the input image; </li>
+        <li>(<i>MOVES Features</i>) a PCA projection of the feature space to <span style='color:red'>R</span><span style='color:green'>G</span><span style='color:blue'>B</span>; </li>
+        <li>(<i>Clusters</i>) The clusters found by HDBSCAN applied to the feature space with each cluster visualized with a random color; </li>
+        <li>(<i>Association</i>) The prediction of the association head on the image on one of the hands in the image; </li>
+        <li>(<i>Hands+Held</i>) A Mask of hands and hand-held Objects in the image. The association head usually does a good job of recognizing the objects that hands are holding. </li>
+</ul>
+</div>
+<br><br>
+<div style="width: 80%;">
+<b>Discussion:</b> 
 <ul style="text-align: left;">
     <li>(row 1) although the cabinet door is thin, MOVES recognizes the association between hand and door.</li>
     <li>(row 2) MOVES detects a large mixing bowl.</li>
@@ -163,11 +177,11 @@
         <p>Richard E. L. Higgins and David F. Fouhey</p>
         <p>In Computer Vision and Pattern Recognition, 2023.</p>
         <pre><code>@inproceedings{higgins2023moves,
-        title={MOVES: Manipulated Objects in Video Enable Segmentation},
-        author={Higgins, Richard EL and Fouhey, David F},
-        booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-        pages={6334--6343},
-        year={2023}
+   title={MOVES: Manipulated Objects in Video Enable Segmentation},
+   author={Higgins, Richard EL and Fouhey, David F},
+   booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+   pages={6334--6343},
+   year={2023}
 }</code></pre>
     </div>
 
