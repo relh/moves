@@ -1,29 +1,33 @@
-MOVES: Manipulated Objects in Video Enable Segmentation
+# MOVES: Manipulated Objects in Video Enable Segmentation
 ====================================
 
-I will publish the cleaned-up code soon. For now here is a brief overview.
+MOVES is a self-supervised means of learning visual features useful for segmentation
+from arbitrary collections of video. At inference time, MOVES requires only an image
+to produce visual features and a segmentation mask. 
 
-Collect a folder of videos
------------------
+Additionally, we demonstrate how one can use pseudolabel segmentation masks as a means
+of discriminating between people and the objects they use. One could also use robot 
+segmentation masks to similarly apply this addition to robotic manipulation video.
 
-All you need is a folder of videos to get started!
+## Installation
 
-Run optical flow bi-directionally between frames offset ~0.5s
------------------
+`pip install -r requirements.txt`
 
-I have code that will `ffprobe` a video and spot the framerate, so don't worry about this.
+You will have to separetly install PyTorch, RapidsAI, and MMFLOW.
 
-(Optional) Use off-the-shelf person segmentation to generate people masks.
------------------
+Once you've installed them, run this to get the optical flow weights: 
+`mim download mmflow --config raft_8x2_100k_flyingthings3d_sintel_368x768`
 
-If your videos don't have people in them, that's fine. Then you can skip this.
+## Usage
+1. Put all your videos in the folder `videos/`
+2. Run `python pseudolabeller.py`, this will:
+- extract frames
+- detect people in the frames using ternaus  
+- cache forward and backwards optical flow between subsequent frames
+3. Run `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python main.py --name newmoves --model hrnet --target ddaa --people --port 23232 --train --inference`
+4. Inside the experiments folder will be your experiment, it will have a `index.html` and `test_index.html` file with saved outputs. We use apache so we make a symlink to public html to view results.
 
-Training
------------------
-
-During training we use the above outputs, creating pseudolabels on the fly. We then learn grouping and association from these labels with a simple MLP.
-
-Citation
+## Citation
 -----------------
 
 If you find our method or this repo helpful, please consider citing our conference paper:

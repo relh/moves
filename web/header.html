@@ -1,0 +1,62 @@
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>VIDEOXPLRER</title>
+<meta name="author" content="Richard E.L. Higgins">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.ico">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<style>
+body {
+								background-color: tan;
+}
+
+tr td{
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+thead th, thead tr { position: sticky; top: 0; z-index: 1; }
+
+img {
+  width: 15vw;
+  min-height: 7vw;
+}
+
+.container, .container-fluid {
+        background-color: white;
+}
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before {
+bottom: .5em;
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.5.0/dist/lazyload.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+<script>
+function hideColumn(iii) {
+  var x = $("td:nth-of-type(" + iii + ")");
+  console.log(x);
+  for (let step = 0; step < x.length; step++) {
+          if (x[step].firstChild.style.display === "none") {
+            x[step].firstChild.style.display = "block";
+          } else {
+            x[step].firstChild.style.display = "none";
+          }
+  }
+}
+</script>
+</head>
