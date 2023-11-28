@@ -47,13 +47,8 @@ def inference(images_path, net, clust, args):
             output = F.normalize(output, dim=1)
         output = torch.nan_to_num(output) 
 
-        try:
-            segments = segment_embeddings(output[:, :min(args.embed_size[0], output.shape[1])], clust).float()
-        except Exception as e:
-            print('clustering failed!')
-            print(str(e))
-            segments = torch.zeros((1, args.embed_size[0], args.embed_size[1])).float()
-
+        # cluster embeddings into segments
+        segments = segment_embeddings(output[:, :min(args.embed_size[0], output.shape[1])], clust).float()
         segments = F.interpolate(einops.repeat(segments.float(), 'c h w -> b c h w', b=1), size=args.img_size).squeeze()
         plt.imsave(f'{args.experiment_path}/test_outputs/{test_image}_clusters.png', (segments / segments.max()).float().cpu(), cmap='nipy_spectral')
 

@@ -84,8 +84,8 @@ def setup(rank, args):
             train_sampler.set_epoch(epoch)
             valid_sampler.set_epoch(epoch)
 
-            train_loss = run_epoch(train_loader, net, scaler, optimizer, epoch, args)
             valid_loss = run_epoch(valid_loader, net, None, None, epoch, args, is_train=False)
+            train_loss = run_epoch(train_loader, net, scaler, optimizer, epoch, args)
 
             dist.all_reduce(train_loss)
             dist.all_reduce(valid_loss)

@@ -393,8 +393,7 @@ def segment_embeddings(embed, clust):
         try:
             real_segments.append(torch.as_tensor(clust.fit_predict(embed[b]).reshape(shape)))
         except Exception as e:
-            print('clustering failed!')
-            print(str(e))
+            print(f'clustering failed! {str(e)}')
             new_segment = torch.zeros(shape)
             new_segment[shape[0]-1:shape[0]+1, shape[1]-1:shape[1]+1] = 1
             real_segments.append(new_segment)

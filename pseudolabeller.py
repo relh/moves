@@ -58,40 +58,50 @@ def get_frame_pairs(frame_folder):
 
 
 def process_videos(video_folder='./videos/', frame_folder='./workspace/frames/', frame_size=(512, 512)):
+    print(f'extracting frames from {video_folder} to {frame_folder}..')
     if not os.path.exists(frame_folder):
         os.makedirs(frame_folder, exist_ok=True)
 
-    for filename in os.listdir(video_folder):
-        if filename.endswith((".mp4", ".avi", ".mov")):  # Add other video formats if needed
-            path = os.path.join(video_folder, filename)
-            cap = cv2.VideoCapture(path)
+    videos = sorted([x for x in os.listdir(video_folder) if x.endswith((".mp4", ".avi", ".mov"))])
 
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            frame_interval = int(fps * 0.5)  # 0.5 seconds between frames
+    for iii, filename in enumerate(videos):
+        if iii % 10 == 0:
+            print(f'processing video {iii} / {len(videos)}')
 
-            count = 0
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
+        path = os.path.join(video_folder, filename)
+        cap = cv2.VideoCapture(path)
 
-                if count % frame_interval == 0:
-                    cropped_resized_frame = crop_and_resize(frame, frame_size)
-                    cv2.imwrite(os.path.join(frame_folder, f"{filename}_frame{count}.png"), cropped_resized_frame)
-                count += 1
-            cap.release()
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_interval = int(fps * 0.5)  # 0.5 seconds between frames
+
+        count = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            if count % frame_interval == 0:
+                cropped_resized_frame = crop_and_resize(frame, frame_size)
+                cv2.imwrite(os.path.join(frame_folder, f"{filename}_frame{count}.png"), cropped_resized_frame)
+            count += 1
+        cap.release()
 
 
 def process_people(frame_folder='./workspace/frames/', people_folder='./workspace/people/'):
+    print(f'estimating people from frames in {frame_folder}, saving in {people_folder}..')
     if not os.path.exists(people_folder):
         os.makedirs(people_folder, exist_ok=True)
 
+    print(f'initializing ternaus model..')
     model = create_model("Unet_2020-07-20").to(0)
     model.eval()
 
-    for filename in os.listdir(frame_folder):
+    all_frames = os.listdir(frame_folder)
+    for iii, filename in enumerate(all_frames):
         frame_path = os.path.join(frame_folder, filename)
-        print('people ' + str(frame_path))
+
+        if iii % 100 == 0:
+            print(f'estimating people in frame {iii} / {len(all_frames)}.. {frame_path}')
         frame = cv2.imread(frame_path)
         image = np.uint8(frame)
 
@@ -123,17 +133,22 @@ def process_flow(frame_folder='./workspace/frames/'):
     #`mim download mmflow --config raft_8x2_100k_flyingthings3d_sintel_368x768`
     config_file = '~/.cache/mim/raft_8x2_100k_flyingthings3d_sintel_368x768.py'
     checkpoint_file = '~/.cache/mim/raft_8x2_100k_flyingthings3d_sintel_368x768.pth'
+
+    print(f'initializing raft model.. {checkpoint_file}')
     model = init_model(config_file, checkpoint_file, device='cuda:0')
 
     # build frame cache
     pfc = [(now_frame, next_frame) for now_frame, next_frame in get_frame_pairs(frame_folder)]
 
+    print(f'saving paired frame cache to disk..') 
     with open('./paired_frame_cache.pkl', 'wb') as pfc_file:
         pickle.dump(pfc, pfc_file, pickle.HIGHEST_PROTOCOL)
 
     # build optical flow cache
-    for now_frame, next_frame in pfc:
-        print('flow ' + str(now_frame) + ' ' + str(next_frame) )
+    for iii, (now_frame, next_frame) in enumerate(pfc):
+
+        if iii % 100 == 0:
+            print('estimating fwd/bck flow in pair {iii} / {len(pfc)}.. {now_frame} <-> {next_frame}')
 
         rgb_now_frame = cv2.imread(now_frame)
         rgb_future_frame = cv2.imread(next_frame)
@@ -146,8 +161,12 @@ def process_flow(frame_folder='./workspace/frames/'):
 
 
 if __name__ == "__main__":
-    process_videos('./videos/', './workspace/frames/')
+    import sys
 
+    video_path = './videos/'
+    if len(sys.argv) > 1:
+        video_path = sys.argv[1]  # sys.argv[1] is the first command line argument
+
+    process_videos(video_path, './workspace/frames/')
     process_people('./workspace/frames/', './workspace/people/')
-
     process_flow('./workspace/frames/')

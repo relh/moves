@@ -11,16 +11,22 @@ segmentation masks to similarly apply this addition to robotic manipulation vide
 
 ## Installation
 
-`pip install -r requirements.txt`
+Your mileage will vary, but something like this on a GPU machine should work. Use conda if you haven't switched to mamba:
+ 
+```
+mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+mamba install -c rapidsai -c conda-forge -c nvidia rapids=23.10 cuml=23.10 python=3.10 cuda-version=11.8
+pip install -U openmim
+mim install mmcv
+pip install -r requirements.txt
+mim download mmflow --config raft_8x2_100k_flyingthings3d_sintel_368x768
+```
 
-You will have to separetly install PyTorch, RapidsAI, and MMFLOW.
-
-Once you've installed them, run this to get the optical flow weights: 
-`mim download mmflow --config raft_8x2_100k_flyingthings3d_sintel_368x768`
+Note in the above you will have to separetly install PyTorch, RapidsAI, and MMFLOW. The last line downloads an optical flow model.
 
 ## Usage
-1. Put all your videos in the folder `videos/`
-2. Run `python pseudolabeller.py`, this will:
+1. Put all your videos in the folder `videos/`. If you don't have any videos, you can download [UCF101](https://www.crcv.ucf.edu/data/UCF101.php). You'll have to then `unrar UCF101.rar`..
+2. Run `python pseudolabeller.py UCF101/`, this will:
 - extract frames
 - detect people in the frames using ternaus  
 - cache forward and backwards optical flow between subsequent frames
@@ -36,7 +42,7 @@ If everything has worked, you should see results pages that look like this:
 </p>
 
 
-And then this for inference, where the HDBSCAN segments are the output.
+And then this for inference, where the HDBSCAN segments (labelled as clusters) are the output.
 
 <p align="center">
   <img src="./web/inference_page.png" alt="training_page" width="75%" />
