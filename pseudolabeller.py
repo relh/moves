@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 import pickle
 import re
@@ -161,12 +162,11 @@ def process_flow(frame_folder='./workspace/frames/'):
 
 
 if __name__ == "__main__":
-    import sys
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--video_path', type=str, default='./videos/', help="Path to the video folder")
+    args = parser.parse_args()
 
-    video_path = './videos/'
-    if len(sys.argv) > 1:
-        video_path = sys.argv[1]  # sys.argv[1] is the first command line argument
-
-    process_videos(video_path, './workspace/frames/')
+    print(args.video_path)
+    process_videos(args.video_path, './workspace/frames/')
     process_people('./workspace/frames/', './workspace/people/')
     process_flow('./workspace/frames/')
