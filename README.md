@@ -43,8 +43,9 @@ mkdir UCF101/
 cd UCF101/
 wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
 unrar e UCF101.rar
+cd ..
 python pseudolabeller.py --video_path=./UCF101/
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python main.py --name ucf101demo --model hrnet \\
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python main.py --name ucf101demo --model hrnet \
                      --target ddaa --people --port 23232 --train --inference
 ```
 
