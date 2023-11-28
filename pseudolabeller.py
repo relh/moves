@@ -5,6 +5,7 @@ import argparse
 import os
 import pickle
 import re
+from multiprocessing import Process, Queue, cpu_count, set_start_method
 
 import albumentations as albu
 import cv2
@@ -15,6 +16,8 @@ from iglovikov_helper_functions.utils.image_utils import pad
 from mmflow.apis import inference_model, init_model
 from people_segmentation.pre_trained_models import create_model
 from PIL import Image
+
+set_start_method('spawn', force=True)
 
 
 def crop_and_resize(frame, target_size):
@@ -123,33 +126,18 @@ def process_people(frame_folder='./workspace/frames/', people_folder='./workspac
         mask.save(output_path, format='PNG')
 
 
-def process_flow(frame_folder='./workspace/frames/'):
-    if not os.path.exists(frame_folder.replace('frames', 'fwd_flow')):
-        os.makedirs(frame_folder.replace('frames', 'fwd_flow'), exist_ok=True)
-
-    if not os.path.exists(frame_folder.replace('frames', 'bck_flow')):
-        os.makedirs(frame_folder.replace('frames', 'bck_flow'), exist_ok=True)
-
+def flow_worker_process(gpu_index, tasks):
     # you need to have setup mmflow and run the following command to run this script:
     #`mim download mmflow --config raft_8x2_100k_flyingthings3d_sintel_368x768`
     config_file = '~/.cache/mim/raft_8x2_100k_flyingthings3d_sintel_368x768.py'
     checkpoint_file = '~/.cache/mim/raft_8x2_100k_flyingthings3d_sintel_368x768.pth'
 
     print(f'initializing raft model.. {checkpoint_file}')
-    model = init_model(config_file, checkpoint_file, device='cuda:0')
+    model = init_model(config_file, checkpoint_file, device=f'cuda:{gpu_index}')
 
-    # build frame cache
-    pfc = [(now_frame, next_frame) for now_frame, next_frame in get_frame_pairs(frame_folder)]
-
-    print(f'saving paired frame cache to disk..') 
-    with open('./paired_frame_cache.pkl', 'wb') as pfc_file:
-        pickle.dump(pfc, pfc_file, pickle.HIGHEST_PROTOCOL)
-
-    # build optical flow cache
-    for iii, (now_frame, next_frame) in enumerate(pfc):
-
+    for iii, (now_frame, next_frame) in enumerate(tasks):
         if iii % 100 == 0:
-            print('estimating fwd/bck flow in pair {iii} / {len(pfc)}.. {now_frame} <-> {next_frame}')
+            print(f'estimating fwd/bck flow in pair {iii} / {len(tasks)}.. {now_frame} <-> {next_frame}')
 
         rgb_now_frame = cv2.imread(now_frame)
         rgb_future_frame = cv2.imread(next_frame)
@@ -161,12 +149,48 @@ def process_flow(frame_folder='./workspace/frames/'):
         np.savez_compressed(now_frame.replace('frames', 'bck_flow'), bck_flow)
 
 
+def process_flow(frame_folder='./workspace/frames/'):
+    num_gpus = torch.cuda.device_count()
+    if num_gpus == 0:
+        raise RuntimeError("No GPUs found! Ensure that GPUs are properly installed.")
+
+    print(f'making flow output folders..')
+    if not os.path.exists(frame_folder.replace('frames', 'fwd_flow')):
+        os.makedirs(frame_folder.replace('frames', 'fwd_flow'), exist_ok=True)
+
+    if not os.path.exists(frame_folder.replace('frames', 'bck_flow')):
+        os.makedirs(frame_folder.replace('frames', 'bck_flow'), exist_ok=True)
+
+    # build frame cache
+    pfc = [(now_frame, next_frame) for now_frame, next_frame in get_frame_pairs(frame_folder)]
+
+    print(f'saving paired frame cache to disk..') 
+    with open('./paired_frame_cache.pkl', 'wb') as pfc_file:
+        pickle.dump(pfc, pfc_file, pickle.HIGHEST_PROTOCOL)
+
+    # Split tasks into chunks and start worker processes
+    total_tasks = len(pfc)
+    chunk_size = (total_tasks + num_gpus - 1) // num_gpus  # Calculate chunk size
+    processes = []
+    for i in range(num_gpus):
+        start = i * chunk_size
+        end = min(start + chunk_size, total_tasks)
+        chunk = pfc[start:end]
+        p = Process(target=flow_worker_process, args=(i, chunk))
+        processes.append(p)
+        p.start()
+
+    # Wait for all worker processes to finish
+    for p in processes:
+        p.join()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--video_path', type=str, default='./videos/', help="Path to the video folder")
     args = parser.parse_args()
 
     print(f'video folder is {args.video_path}')
-    process_videos(args.video_path, './workspace/frames/')
-    process_people('./workspace/frames/', './workspace/people/')
+    #process_videos(args.video_path, './workspace/frames/')
+    #process_people('./workspace/frames/', './workspace/people/')
     process_flow('./workspace/frames/')
