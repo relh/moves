@@ -9,6 +9,8 @@ Additionally, we demonstrate how one can use pseudolabel segmentation masks as a
 of discriminating between people and the objects they use. One could also use robot 
 segmentation masks to similarly apply this addition to robotic manipulation video.
 
+To learn more, visit the website: https://relh.github.io/moves/
+
 ## Installation
 
 Your mileage will vary, but something like this on a GPU machine should work. Use conda if you haven't switched to mamba:
