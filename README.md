@@ -38,6 +38,16 @@ As an example, lets try an arbitrary dataset, how about [UCF101](https://www.crc
 5. Run `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python main.py --name ucf101demo --model hrnet --target ddaa --people --port 23232 --train --inference`
 6. Inside the experiments folder will be your experiment, it will have a `index.html` and `test_index.html` file with saved outputs. We use apache so we make a symlink to public html to view results.
 
+```
+mkdir UCF101/
+cd UCF101/
+wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
+unrar e UCF101.rar
+python pseudolabeller.py --video_path=./UCF101/
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python main.py --name ucf101demo --model hrnet \\
+                     --target ddaa --people --port 23232 --train --inference
+```
+
 ## Visualization
 
 If everything has worked, you should see results pages that look like this:

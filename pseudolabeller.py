@@ -166,7 +166,7 @@ if __name__ == "__main__":
     parser.add_argument('--video_path', type=str, default='./videos/', help="Path to the video folder")
     args = parser.parse_args()
 
-    print(args.video_path)
+    print(f'video folder is {args.video_path}')
     process_videos(args.video_path, './workspace/frames/')
     process_people('./workspace/frames/', './workspace/people/')
     process_flow('./workspace/frames/')
