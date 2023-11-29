@@ -84,8 +84,8 @@ def setup(rank, args):
             train_sampler.set_epoch(epoch)
             valid_sampler.set_epoch(epoch)
 
-            valid_loss = run_epoch(valid_loader, net, None, None, epoch, args, is_train=False)
             train_loss = run_epoch(train_loader, net, scaler, optimizer, epoch, args)
+            valid_loss = run_epoch(valid_loader, net, None, None, epoch, args, is_train=False)
 
             dist.all_reduce(train_loss)
             dist.all_reduce(valid_loss)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument('--motion_model', type=str, default='kornia', help='whether to use kornia or cv2')
 
     # optimization parameters
-    parser.add_argument('--lr', type=float, default=0.00001, help='what lr')
+    parser.add_argument('--lr', type=float, default=0.0001, help='what lr')
     parser.add_argument('--weight_decay', type=float, default=1e-5, help='what decay')
     parser.add_argument('--early_stopping', type=int, default=5, help='number of epochs before early stopping')
     parser.add_argument('--finetune', dest='finetune', action='store_true', help='whether to finetune')
@@ -170,8 +170,8 @@ if __name__ == "__main__":
 
     # training parameters
     parser.add_argument('--num_epoch', type=int, default=1000, help='num_epoch')
-    parser.add_argument('--train_len', type=int, default=1000, help='number of samples per epoch')
-    parser.add_argument('--valid_len', type=int, default=100, help='number of outputs to write')
+    parser.add_argument('--train_len', type=int, default=-1, help='number of samples per epoch')
+    parser.add_argument('--valid_len', type=int, default=-1, help='number of outputs to write')
 
     parser.set_defaults(train=False)
     parser.set_defaults(visualize=True)

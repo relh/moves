@@ -191,6 +191,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print(f'video folder is {args.video_path}')
-    #process_videos(args.video_path, './workspace/frames/')
-    #process_people('./workspace/frames/', './workspace/people/')
+    process_videos(args.video_path, './workspace/frames/')
+    process_people('./workspace/frames/', './workspace/people/')
     process_flow('./workspace/frames/')
