@@ -30,6 +30,8 @@ def write_inference_html(args):
                 f.write(f'<td><div><img class="lazy" onerror="this.onerror=null; this.remove();" data-src="/~relh/experiments/{args.name}/test_outputs/{x}"></div></td>')
             f.write('</tr>')
 
+            if qqq > 500: break
+
         f.write('</tbody></table>')
         f.write('''<script>
                 var lazyloadinstance = new LazyLoad({
@@ -79,6 +81,9 @@ def write_index_html(args):
                     for z, x in enumerate(future_files):
                         f.write(f'<td><div><img class="lazy" onerror="this.onerror=null; this.remove();" data-src="/~relh/experiments/{args.name}/outputs/{x}"></div></td>')
                     f.write('</tr>')
+
+            if qqq > 500: break
+
         f.write('</tbody></table>')
         f.write('''<script>
                 var lazyloadinstance = new LazyLoad({

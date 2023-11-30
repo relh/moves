@@ -4,6 +4,7 @@
 import sys
 import time
 
+import cupy
 import einops
 import torch
 import torch.nn as nn
@@ -33,10 +34,11 @@ def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visual
     # --- initialize variables ---
     torch.set_grad_enabled(is_train)
     torch.backends.cudnn.benchmark = True
+    cupy.cuda.Device(args.rank).use()
 
     pbar = tqdm(loader, ncols=200)
     epoch_len = args.train_len if is_train else args.valid_len 
-    if epoch_len == -1: epoch_len = len(loader)
+    if epoch_len == -1: epoch_len = len(loader) * args.batch_size
     net.train() if is_train else net.eval()
 
     losses, loss, step = 0, 0, 0
@@ -71,6 +73,9 @@ def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visual
 
                 now_people = batch['now']['people'].float().bool().cuda(non_blocking=True)
                 future_people = batch['future']['people'].float().bool().cuda(non_blocking=True)
+
+                if now_future_flow.shape[0] != mesh_grids.shape[0]: continue
+                if future_now_flow.shape[0] != mesh_grids.shape[0]: continue
 
                 # =============== correlation grids from flow ====================
                 now_future_corr_grid = build_corr_grid(now_future_flow, mesh_grids, args)

@@ -11,7 +11,7 @@ import torch.utils.data
 from torchvision import transforms
 
 from functions import (input_multiplexer, output_multiplexer, save_image,
-                       segment_embeddings)
+                       segment_embeddings, pca_image)
 from write import write_inference_html
 
 

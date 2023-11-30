@@ -9,6 +9,7 @@ import random
 import sys
 from pathlib import Path
 
+import cupy
 import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
@@ -20,6 +21,7 @@ from torch.utils.data import DataLoader, DistributedSampler
 
 from dataset import MOVES_Dataset
 from model import MOVES_Model
+from write import write_index_html
 
 
 def setup(rank, args):
@@ -31,6 +33,7 @@ def setup(rank, args):
     os.environ['NCCL_P2P_DISABLE'] = str(1)
     dist.init_process_group(backend='nccl', rank=args.rank, world_size=args.num_gpus, init_method='env://')
     torch.cuda.set_device(rank)
+    cupy.cuda.Device(rank).use()
 
     # --- initialize network ---
     net = MOVES_Model(args).cuda()
@@ -111,6 +114,8 @@ def setup(rank, args):
                 print('--> loss failed to decrease {} epochs..\t\t\tthreshold is {}, {} all..{}'.format(failed_epochs, args.early_stopping, valid_losses, min_loss))
             if failed_epochs > args.early_stopping: break
 
+    if args.rank == 0: write_index_html(args)
+
     if args.load: net, net_mtime = load(rank, net)
     torch.set_grad_enabled(False)
 
@@ -158,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('--motion_model', type=str, default='kornia', help='whether to use kornia or cv2')
 
     # optimization parameters
-    parser.add_argument('--lr', type=float, default=0.0001, help='what lr')
+    parser.add_argument('--lr', type=float, default=0.00015, help='what lr')
     parser.add_argument('--weight_decay', type=float, default=1e-5, help='what decay')
     parser.add_argument('--early_stopping', type=int, default=5, help='number of epochs before early stopping')
     parser.add_argument('--finetune', dest='finetune', action='store_true', help='whether to finetune')
@@ -176,7 +181,7 @@ if __name__ == "__main__":
     parser.set_defaults(train=False)
     parser.set_defaults(visualize=True)
     parser.set_defaults(inference=True)
-    parser.set_defaults(load=False)
+    parser.set_defaults(load=True)
 
     parser.set_defaults(people=False)
     parser.set_defaults(merge=True)
@@ -191,7 +196,7 @@ if __name__ == "__main__":
     # --- machine setup: directories, one output path for everything ---
     if args.num_gpus is None:
         args.num_gpus = len(os.environ["CUDA_VISIBLE_DEVICES"].split(','))
-    args.batch_size = args.num_gpus * 2
+    args.batch_size = args.num_gpus * 4
     print(f'args.num_gpus: {args.num_gpus}')
 
     args.experiment_path = f'./experiments/{args.name}/'

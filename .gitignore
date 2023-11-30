@@ -1,6 +1,7 @@
 workspace/
 videos/
 experiments/
+experiments
 *.pkl
 
 # Byte-compiled / optimized / DLL files
