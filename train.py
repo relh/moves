@@ -26,7 +26,7 @@ from functions import (build_assoc_inputs, build_corr_grid, build_group_inputs,
 from write import write_index_html
 
 
-def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visualize=True):
+def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visualize=False):
     # --- synchronize workers ---
     dist.barrier()
     if is_train: loader.sampler.set_epoch(epoch)
@@ -73,9 +73,6 @@ def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visual
 
                 now_people = batch['now']['people'].float().bool().cuda(non_blocking=True)
                 future_people = batch['future']['people'].float().bool().cuda(non_blocking=True)
-
-                if now_future_flow.shape[0] != mesh_grids.shape[0]: continue
-                if future_now_flow.shape[0] != mesh_grids.shape[0]: continue
 
                 # =============== correlation grids from flow ====================
                 now_future_corr_grid = build_corr_grid(now_future_flow, mesh_grids, args)
@@ -184,7 +181,7 @@ def run_epoch(loader, net, scaler, optimizer, epoch, args, is_train=True, visual
                 aal += future_weight * torch.nan_to_num(aa_ce_loss(future_assoc_out, future_assoc_labels), nan=0.99)
                 aal = 10.0 * aal
 
-            if not is_train:
+            if not is_train and visualize:
                 now_segments = segment_embeddings(n_o['e'][:, :min(args.embed_size[0], n_o['e'].shape[1])], clust).float()
                 future_segments = segment_embeddings(f_o['e'][:, :min(args.embed_size[0], f_o['e'].shape[1])], clust).float()
 

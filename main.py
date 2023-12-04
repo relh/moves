@@ -50,8 +50,8 @@ def setup(rank, args):
     # --- make datasets, samplers, dataloaders ---
     train_data, valid_data = MOVES_Dataset(train_frames, people=args.people, train=True), MOVES_Dataset(valid_frames, people=args.people)
     train_sampler, valid_sampler = DistributedSampler(train_data, shuffle=True), DistributedSampler(valid_data, shuffle=False)
-    train_loader = DataLoader(train_data, batch_size=args.batch_size // args.num_gpus, num_workers=0, sampler=train_sampler)
-    valid_loader = DataLoader(valid_data, batch_size=args.batch_size // args.num_gpus, num_workers=0, sampler=valid_sampler)
+    train_loader = DataLoader(train_data, batch_size=args.batch_size // args.num_gpus, num_workers=0, sampler=train_sampler, drop_last=True)
+    valid_loader = DataLoader(valid_data, batch_size=args.batch_size // args.num_gpus, num_workers=0, sampler=valid_sampler, drop_last=True)
 
     # --- load checkpoint ---
     def load(rank, net):
@@ -119,6 +119,9 @@ def setup(rank, args):
     if args.load: net, net_mtime = load(rank, net)
     torch.set_grad_enabled(False)
 
+    if args.visualize:
+        valid_loss = run_epoch(valid_loader, net, None, None, epoch, args, is_train=False, visualize=True)
+
     if args.inference: 
         from inference import inference
         print('inference..')
@@ -175,11 +178,11 @@ if __name__ == "__main__":
 
     # training parameters
     parser.add_argument('--num_epoch', type=int, default=1000, help='num_epoch')
-    parser.add_argument('--train_len', type=int, default=-1, help='number of samples per epoch')
-    parser.add_argument('--valid_len', type=int, default=-1, help='number of outputs to write')
+    parser.add_argument('--train_len', type=int, default=10000, help='number of samples per epoch')
+    parser.add_argument('--valid_len', type=int, default=500, help='number of outputs to write')
 
     parser.set_defaults(train=False)
-    parser.set_defaults(visualize=True)
+    parser.set_defaults(visualize=False)
     parser.set_defaults(inference=True)
     parser.set_defaults(load=True)
 
