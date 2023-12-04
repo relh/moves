@@ -57,14 +57,12 @@ def setup(rank, args):
     def load(rank, net):
         net_mtime = datetime.datetime.fromtimestamp(60*60*24.0)
         if net == None: return None, net_mtime
-        checkpoints = list(Path('./checkpoints/').rglob("*.ckpt"))
+        checkpoints = list(Path(args.experiment_path + 'models/').rglob("*.ckpt"))
         if len(checkpoints) > 0:
-            if rank == 0: print(f'checkpoints! {checkpoints}')
             checkpoints.sort(key=lambda x: float(str(x).split('/')[-1].split('_')[0]))
-            print(os.path.getmtime(checkpoints[0]))
-            model_path = os.path.join('./checkpoints/', checkpoints[0])
-            net_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(model_path))
-            load_dict = torch.load(model_path, map_location={'cuda:%d' % 0: 'cuda:%d' % rank})
+            if rank == 0: print(f'checkpoints! {checkpoints}')
+            net_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(checkpoints[0]))
+            load_dict = torch.load(checkpoints[0], map_location={'cuda:%d' % 0: 'cuda:%d' % rank})
             net.load_state_dict(load_dict['model'])
             if rank == 0: print(f'loaded model! {str(checkpoints[0])}')
         return net, net_mtime
@@ -178,8 +176,8 @@ if __name__ == "__main__":
 
     # training parameters
     parser.add_argument('--num_epoch', type=int, default=1000, help='num_epoch')
-    parser.add_argument('--train_len', type=int, default=10000, help='number of samples per epoch')
-    parser.add_argument('--valid_len', type=int, default=500, help='number of outputs to write')
+    parser.add_argument('--train_len', type=int, default=100000, help='number of samples per epoch')
+    parser.add_argument('--valid_len', type=int, default=1000, help='number of outputs to write')
 
     parser.set_defaults(train=False)
     parser.set_defaults(visualize=False)
