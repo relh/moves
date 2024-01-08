@@ -416,14 +416,18 @@ def change_brightness(img):
 
 
 def pca_image(y, rank=3):
+    y = y.clip(-1e9, 1e9)
     y = y.detach().permute(1, 2, 0)
     y_shape = y.shape
     # visualize
-    pca_y = pca_lowrank(y.reshape(-1, y.shape[-1]).float(), rank, center=True)
-    pca_y = pca_y[0]
-    y = pca_y.reshape(y_shape[0], y_shape[1], rank)
-    y = y.cpu().numpy()
-    y = (((y - y.mean(axis=(0, 1))) / (3 * y.std(axis=(0, 1)))) + 0.5).clip(0, 1)
+    try:
+        pca_y = pca_lowrank(y.reshape(-1, y.shape[-1]).float(), rank, center=True)[0]
+        pca_y = pca_y.reshape(y_shape[0], y_shape[1], rank)
+    except:
+        pca_y = torch.zeros(y_shape[0], y_shape[1], rank)
+
+    y = torch.nan_to_num(pca_y).cpu().numpy()
+    y = (((y - y.mean(axis=(0, 1))) / ((3 * y.std(axis=(0, 1))) + 1e-7)) + 0.5).clip(0, 1)
     #y = (y - y.min()) / (y.max() - y.min())
     #y = xyz2rgb(y) #np.roll(y, 2, 2))
     return torch.tensor(y)
@@ -453,7 +457,7 @@ def store_image(inp=None, label='features', option='save', iii=0, bb=0, args=Non
                 save_image(combo_pca[:, :, i * args.embed_size[1]:(i + 1) * args.embed_size[1]], f'{args.experiment_path}/outputs/{iii}_{b}_{l}.png', format='png')
         elif option == 'flow':
             import flow_vis
-            flow_vis_out = flow_vis.flow_to_color(inp[b].cpu().numpy(), convert_to_bgr=False)
+            flow_vis_out = flow_vis.flow_to_color(torch.nan_to_num(inp[b]).cpu().numpy(), convert_to_bgr=False)
             flow_vis_out = Image.fromarray(np.uint8(flow_vis_out))
             flow_vis_out.save(f'{args.experiment_path}/outputs/{iii}_{b}_{label}.png')
         elif option == 'rgb':

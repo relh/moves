@@ -14,6 +14,7 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 import torch.nn as nn
+from prodigyopt import Prodigy
 from torch.cuda.amp import GradScaler
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -74,7 +75,11 @@ def setup(rank, args):
         if args.load: net, net_mtime = load(rank, net)
 
         # --- setup optimizer ---
-        optimizer = torch.optim.AdamW(net.parameters(), betas=(0.9, 0.95), lr=args.lr, eps=1e-8, weight_decay=args.weight_decay)
+        if args.optimizer == 'prodigy':
+            optimizer = Prodigy(net.parameters(), decouple=True, lr=1., weight_decay=args.weight_decay, safeguard_warmup=True)
+        else:
+            optimizer = torch.optim.AdamW(net.parameters(), betas=(0.9, 0.95), lr=args.lr, eps=1e-8, weight_decay=args.weight_decay)
+
         rlrop = ReduceLROnPlateau(optimizer, 'min', patience=int(args.early_stopping / 2), factor=0.5)
         scaler = GradScaler()
         train_losses, valid_losses = [], []
@@ -85,8 +90,8 @@ def setup(rank, args):
             train_sampler.set_epoch(epoch)
             valid_sampler.set_epoch(epoch)
 
-            train_loss = run_epoch(train_loader, net, scaler, optimizer, epoch, args)
             valid_loss = run_epoch(valid_loader, net, None, None, epoch, args, is_train=False)
+            train_loss = run_epoch(train_loader, net, scaler, optimizer, epoch, args)
 
             dist.all_reduce(train_loss)
             dist.all_reduce(valid_loss)
@@ -111,6 +116,7 @@ def setup(rank, args):
                 failed_epochs += 1
                 print('--> loss failed to decrease {} epochs..\t\t\tthreshold is {}, {} all..{}'.format(failed_epochs, args.early_stopping, valid_losses, min_loss))
             if failed_epochs > args.early_stopping: break
+            if args.load: net, net_mtime = load(rank, net)
 
     if args.rank == 0: write_index_html(args)
 
@@ -164,9 +170,10 @@ if __name__ == "__main__":
     parser.add_argument('--motion_model', type=str, default='kornia', help='whether to use kornia or cv2')
 
     # optimization parameters
+    parser.add_argument('--optimizer', type=str, default='prodigy', help='adamw / prodigy')
     parser.add_argument('--lr', type=float, default=0.00015, help='what lr')
-    parser.add_argument('--weight_decay', type=float, default=1e-5, help='what decay')
-    parser.add_argument('--early_stopping', type=int, default=5, help='number of epochs before early stopping')
+    parser.add_argument('--weight_decay', type=float, default=1e-6, help='what decay')
+    parser.add_argument('--early_stopping', type=int, default=10, help='number of epochs before early stopping')
     parser.add_argument('--finetune', dest='finetune', action='store_true', help='whether to finetune')
 
     # machine parameters
